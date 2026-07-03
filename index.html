@@ -174,7 +174,7 @@
 
   <button class="compute" id="calc">Calculer le meilleur plan</button>
   <div id="out"></div>
-  <footer>v6 · moyenne arrondie vers le bas · 30 = 31 (dernier point gratuit) · plafond = max des 2 parents</footer>
+  <footer>v7 · moyenne arrondie vers le bas · 31 possible uniquement si un parent est déjà à 31 (dernier point 30→31 offert) · plafond = max des 2 parents</footer>
 </div>
 
 <script>
@@ -182,7 +182,7 @@
 const STATS=["PV","ATK","DEF","SpA","SpD","VIT"], MAX=31;
 const floorAvg=(a,b)=>Math.floor((a+b)/2);
 const popcount=m=>{let c=0;while(m){c+=m&1;m>>>=1;}return c;};
-const CM=v=> v>=30?31:v;   // 30 et 31 comptent comme 31 (le 30->31 est gratuit)
+const CM=v=> v>=31?31:v;   // SEUL un vrai 31 compte comme 31 (un 30 reste un 30). Le 30->31 reste gratuit en COÛT, mais uniquement si un parent est réellement à 31.
 
 // On boost la moyenne (plafond = max des 2 parents). Règle : atteindre 31 = payer jusqu'à 30.
 // dp[v] = coût mini pour que CE noeud vaille v (valeurs "clampées" : 0..29 ou 31).
@@ -295,7 +295,7 @@ function renderNevos(){
       </div>
       <div class="ivs">
         ${STATS.map((s,k)=>`<div class="iv"><span>${s}</span>
-          <input type="number" min="0" max="31" inputmode="numeric" value="${nv.iv[k]}" data-iv="${k}" class="${nv.iv[k]>=31?'max':''}"></div>`).join("")}
+          <input type="number" min="0" max="31" inputmode="numeric" onfocus="this.select()" value="${nv.iv[k]}" data-iv="${k}" class="${nv.iv[k]>=31?'max':''}"></div>`).join("")}
       </div>
       <div class="iv-total">Total IV <b>${total}</b> / 186</div>
       <div class="card-actions"><button class="ghost" data-del>Supprimer</button></div>`;
@@ -316,7 +316,7 @@ document.getElementById("addNevo").onclick=()=>{ state.nevos.push(blankNevo()); 
 const tgtRow=document.getElementById("tgtRow");
 function renderTarget(){
   tgtRow.innerHTML=STATS.map((s,k)=>`<div class="iv"><span>${s}</span>
-    <input type="number" min="0" max="31" inputmode="numeric" value="${state.target[k]}" data-t="${k}" class="${state.target[k]>=31?'max':''}"></div>`).join("");
+    <input type="number" min="0" max="31" inputmode="numeric" onfocus="this.select()" value="${state.target[k]}" data-t="${k}" class="${state.target[k]>=31?'max':''}"></div>`).join("");
   tgtRow.querySelectorAll('input[data-t]').forEach(inp=>inp.oninput=()=>{
     let v=parseInt(inp.value); if(isNaN(v))v=0; v=Math.max(0,Math.min(31,v));
     state.target[+inp.dataset.t]=v; inp.classList.toggle('max',v>=31);
@@ -423,7 +423,7 @@ document.getElementById("calc").onclick=()=>{
         ${fragRows.map((r,ri)=>`<tr>
           <td>${esc(r[0])}</td>
           <td class="num">${r[1].toLocaleString('fr-FR')}</td>
-          <td class="num"><input type="number" min="0" value="0" data-stock="${ri}" style="width:100px;text-align:right"></td>
+          <td class="num"><input type="number" min="0" value="0" onfocus="this.select()" data-stock="${ri}" style="width:100px;text-align:right"></td>
           <td class="num" data-tofarm="${ri}" data-need="${r[1]}">${r[1].toLocaleString('fr-FR')}</td>
         </tr>`).join("")}
         </tbody>
