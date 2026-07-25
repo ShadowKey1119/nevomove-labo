@@ -275,8 +275,7 @@
     <div class="field">
       <label>IV visés pour l'enfant final</label>
       <div class="ivs tgt-row" id="tgtRow"></div>
-      <button class="preset" id="presetMax">Tout à 31 (186)</button>
-      <button class="preset" id="optimax">⚡ Optimisation max (le mieux possible avec mes névos)</button>
+      <div class="hint">Rempli automatiquement avec le meilleur atteignable selon tes névos actuels. Modifie une valeur toi-même si tu veux une cible différente.</div>
     </div>
 
     <datalist id="elemList">
@@ -505,9 +504,11 @@ function renderNevos(){
       if(inp.value!=='' && +inp.value!==v) inp.value=v;
       nv.iv[+inp.dataset.iv]=v; inp.classList.toggle('max',v>=31);
       card.querySelector('.iv-total b').textContent=nv.iv.reduce((a,b)=>a+b,0);
+      autoOptimax();
     });
     listEl.appendChild(card);
   });
+  autoOptimax();
 }
 document.getElementById("addNevo").onclick=()=>{
   const nb=blankNevo();
@@ -526,16 +527,15 @@ function renderTarget(){
     state.target[+inp.dataset.t]=v; inp.classList.toggle('max',v>=31); state.tmode='manuel';
   });
 }
-document.getElementById("presetMax").onclick=()=>{ state.target=[31,31,31,31,31,31]; state.tmode='all31'; renderTarget(); };
-document.getElementById("optimax").onclick=()=>{
+function autoOptimax(){
+  if(state.tmode==='manuel') return; // l'utilisateur a personnalisé une cible à la main, on ne l'écrase pas
   const nv=state.nevos.filter(n=>n.iv.some(v=>v>0));
-  if(nv.length<2){ document.getElementById("calc").click(); return; }
+  if(nv.length<1) return;
   // pour chaque stat : meilleure valeur atteignable = max (clampé) parmi mes névos
   const tmax=[0,0,0,0,0,0];
   for(let s=0;s<6;s++){ let m=0; nv.forEach(n=>{ const c=CM(n.iv[s]); if(c>m)m=c; }); tmax[s]=m; }
   state.target=tmax.slice(); state.tmode='optimax'; renderTarget();
-  document.getElementById("calc").click();
-};
+}
 
 
 
@@ -596,7 +596,7 @@ document.getElementById("calc").onclick=()=>{
         <div class="note">${nF} fusion${nF>1?'s':''} · cible ${T.join('/')}</div>
       </div>
 
-      <div class="panel-h" style="margin-top:4px"><span class="idx">↪</span><h2>Marche à suivre</h2>${state.tmode==='all31'?'<span class="mode-tag">🎯 Tout à 31</span>':state.tmode==='optimax'?'<span class="mode-tag">⚡ Optimisation max</span>':'<span class="mode-tag manual">✍️ Cible manuelle</span>'}</div>
+      <div class="panel-h" style="margin-top:4px"><span class="idx">↪</span><h2>Marche à suivre</h2>${state.tmode==='optimax'?'<span class="mode-tag">⚡ Optimisation automatique</span>':'<span class="mode-tag manual">✍️ Cible manuelle</span>'}</div>
 
       ${fus.map((fu,i)=>{
         const isLast=i===lastIdx;
