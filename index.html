@@ -238,6 +238,7 @@
   .mode-tag.manual{color:var(--muted);border-color:var(--line);background:rgba(255,255,255,.03)}
   .type-row.locked .seg button:disabled{cursor:default;opacity:.9}
   .type-row.locked input.el[readonly]{color:var(--muted);cursor:default;border-style:dashed}
+  img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;-moz-user-select:none}
 </style>
 </head>
 <body>
@@ -860,6 +861,10 @@ renderDex();
 renderTarget();
 state.nevos.push(blankNevo()); state.nevos.push(blankNevo());
 renderNevos();
+
+/* ===================== ANTI-TÉLÉCHARGEMENT SPRITES ===================== */
+document.addEventListener('contextmenu', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
+document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
 </script>
 </body>
 </html>
